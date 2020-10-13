@@ -15,7 +15,7 @@ function customSetRegion() {
             function success(result) {
             var lookup = new Array();
             lookup[0] = new Object();
-			lookup[0].id = result.entities[0]["_new_cityofregion_value"];
+	    lookup[0].id = result.entities[0]["_new_cityofregion_value"];
             lookup[0].name = result.entities[0]["_new_cityofregion_value@OData.Community.Display.V1.FormattedValue"];
             lookup[0].entityType = result.entities[0]["_new_cityofregion_value@Microsoft.Dynamics.CRM.lookuplogicalname"];
             Xrm.Page.getAttribute("new_regionfield").setValue(lookup);
