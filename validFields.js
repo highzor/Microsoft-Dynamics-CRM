@@ -19,7 +19,7 @@ function validFields(buttonParam) {
         errors += Xrm.Page.getControl("emailaddress1").getLabel() + "; ";
     }
     if (count > 0) {
-        Xrm.Page.ui.setFormNotification("Заполните следующие поля: " + errors, "EROR", "1");
+        Xrm.Page.ui.setFormNotification("Заполните следующие поля: " + errors, "ERROR", "1");
     } else {
         if (buttonParam == 1) {
             Xrm.Page.data.save();
