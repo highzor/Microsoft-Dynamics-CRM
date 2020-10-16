@@ -31,7 +31,7 @@ namespace Microsoft.Crm.Sdk.Samples
                 }
                 catch (FaultException<OrganizationServiceFault> ex)
                 {
-                    throw new InvalidPluginExecutionException($"(FaultException exception: {ex.Message}");
+                    throw new InvalidPluginExecutionException($"FaultException exception: {ex.Message}");
                 }
                 catch (Exception ex)
                 {
