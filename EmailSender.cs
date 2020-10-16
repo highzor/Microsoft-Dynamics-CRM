@@ -3,10 +3,11 @@ using Microsoft.Xrm.Sdk;
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Query;
 using System.ServiceModel;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Crm.Sdk.Samples
-{
-    class EmailSender : IPlugin
+{    
+    public class EmailSender : IPlugin
     {
         public void Execute(IServiceProvider serviceProvider)
         {
@@ -22,46 +23,64 @@ namespace Microsoft.Crm.Sdk.Samples
                 IOrganizationServiceFactory serviceFactory =
                     (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
                 IOrganizationService service = serviceFactory.CreateOrganizationService(context.UserId);
-
                 try
                 {
-                    Entity _Contact = service.Retrieve("contact", new Guid(context.PrimaryEntityName), new ColumnSet(new string[] { "fullname", "new_regionfield", "new_cityfield", "emailaddress1" }));
-                    string Name = _Contact["fullname"].ToString();
-                    string Region = _Contact["new_regionfield"].ToString();
-                    string City = _Contact["new_cityfield"].ToString();
-                    string Email = _Contact["emailaddress1"].ToString();
-                    Entity fromActivityParty = new Entity("activityparty");
-                    Entity toActivityParty = new Entity("activityparty");
-                    Guid userId = context.UserId;
-                    Guid contactId = (Guid)_Contact.Attributes["contactid"];
-                    fromActivityParty["partyid"] = new EntityReference("systemuser", userId);
-                    toActivityParty["partyid"] = new EntityReference("contact", contactId);
-                    Entity email = new Entity("email");
-                    email["from"] = new Entity[] { fromActivityParty };
-                    email["to"] = new Entity[] { toActivityParty };
-                    email["regardingobjectid"] = new EntityReference("contact", contactId);
-                    email["subject"] = "This is the subject";
-                    email["description"] = $"Hello: {Name}, {Region}, {City}, {Email}";
-                    email["directioncode"] = true;
-                    Guid emailId = service.Create(email);
-                    SendEmailRequest sendEmailRequest = new SendEmailRequest
-                    {
-                        EmailId = emailId,
-                        TrackingToken = "",
-                        IssueSend = true
-                    };
+                    Entity _Contact = CreateContact(service, context);
+                    SendEmailRequest sendEmailRequest = CreateEmail(_Contact, context, service);
                     SendEmailResponse sendEmailresp = (SendEmailResponse)service.Execute(sendEmailRequest);
                 }
                 catch (FaultException<OrganizationServiceFault> ex)
                 {
-                    throw new InvalidPluginExecutionException("An error occurred in FollowUpPlugin.", ex);
+                    throw new InvalidPluginExecutionException($"(FaultException exception: {ex.Message}");
                 }
                 catch (Exception ex)
                 {
-                    tracingService.Trace("FollowUpPlugin: {0}", ex.ToString());
-                    throw;
+                    tracingService.Trace($"FollowUpPlugin: {ex.Message}");
+                    throw new InvalidPluginExecutionException($"An exception happend: {ex.Message}");
                 }
             }
+        }
+        public Entity CreateContact(IOrganizationService service, IPluginExecutionContext context)
+        {
+            Entity _Contact = service.Retrieve("contact", context.PrimaryEntityId,
+                        new ColumnSet("fullname", "new_regionfield", "new_cityfield", "emailaddress1"));
+            return _Contact;
+        }
+        public SendEmailRequest CreateEmail(Entity _Contact, IPluginExecutionContext context, IOrganizationService service)
+        {
+            string Name = "";
+           if (_Contact["fullname"] != null)
+            {
+              Name = _Contact["fullname"].ToString();
+            }
+            EntityReference Region = _Contact["new_regionfield"] as EntityReference;
+            EntityReference City = _Contact["new_cityfield"] as EntityReference;
+            string Email = "";
+            if (_Contact["emailaddress1"] != null)
+            {
+                Email = _Contact["emailaddress1"].ToString();
+            }
+            Entity fromActivityParty = new Entity("activityparty");
+            Entity toActivityParty = new Entity("activityparty");
+            Guid userId = context.UserId;
+            Guid contactId = (Guid)_Contact.Attributes["contactid"];
+            fromActivityParty["partyid"] = new EntityReference("systemuser", userId);
+            toActivityParty["partyid"] = new EntityReference("contact", contactId);
+            Entity email = new Entity("email");
+            email["from"] = new Entity[] { fromActivityParty };
+            email["to"] = new Entity[] { toActivityParty };
+            email["regardingobjectid"] = new EntityReference("contact", contactId);
+            email["subject"] = "This is the subject";
+            email["description"] = $"Hello: {Name}, {Region.Name}, {City.Name}, {Email}";
+            email["directioncode"] = true;
+            Guid emailId = service.Create(email);
+            SendEmailRequest sendEmailRequest = new SendEmailRequest
+            {
+                EmailId = emailId,
+                TrackingToken = "",
+                IssueSend = true
+            };
+            return sendEmailRequest;
         }
     }
 }
