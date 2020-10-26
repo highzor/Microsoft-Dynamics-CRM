@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<style type="text/css">
+TABLE {
+    border: 1px solid grey;
+	border-collapse: collapse;
+	text-align: center;
+	width: 500px;
+   }
+   TH {
+    border: 1px solid grey;
+	border-collapse: collapse;
+   }
+  </style>
+<table>
+  <tr>
+    <th>Название</th>
+    <th>Описание</th>
+    <th>Действие</th>
+  </tr>
+</table>
+<script type="text/javascript">
+customSetRegion()
+function customSetRegion() {
+	var name = window.parent.Xrm.Page.getAttribute("fullname").getValue();
+        var FetchXML = "<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>"
+             + "<entity name='annotation'>"
+             + "<attribute name='subject' />"
+             + "<attribute name='notetext' />"
+             + "<attribute name='filename' />"
+             + "<attribute name='annotationid' />"
+             + "<order attribute='subject' descending = 'false' />"
+             + "<link-entity name='lead' from ='leadid' to ='objectid' link-type='inner' alias ='ae'>"
+             + "<filter type= 'and'>"
+             + "<condition attribute='fullname' operator='eq' value ='"+name+"' />"
+             + "</filter>"
+             + "</link-entity>"
+             + "</entity>"
+             + "</fetch>"
+
+            FetchXML = "?fetchXml=" + encodeURIComponent(FetchXML);
+        window.parent.Xrm.WebApi.retrieveMultipleRecords("annotation", FetchXML).then(
+
+            function success(result) {
+            var anns = new Array();
+            for (let i = 0; i < result.entities.length; i++) {
+                anns[i] = {
+                    id: result.entities[i].annotationid,
+                    sub: result.entities[i].subject,
+                    note: result.entities[i].notetext
+                };
+            }
+            for (property in anns) {
+			  tabBody=document.getElementsByTagName("table").item(0);
+			  row=document.createElement("tr");
+			  cell1 = document.createElement("td");
+			  cell2 = document.createElement("td");
+			  cell3 = document.createElement("td");
+			  textnode1=document.createTextNode(anns[property].sub);
+			  textnode2=document.createTextNode(anns[property].note);
+			  textnode3=document.createElement("BUTTON");
+			  textnode3.innerHTML = "удалить";
+			  textnode3.setAttribute("id", anns[property].id);
+			  textnode3.setAttribute("onclick", "deleteFunction(id);");
+			  cell1.appendChild(textnode1);
+			  cell2.appendChild(textnode2);
+			  cell3.appendChild(textnode3);
+			  row.appendChild(cell1);
+			  row.appendChild(cell2);
+			  row.appendChild(cell3);
+			  tabBody.appendChild(row);
+            }
+        },
+            function (error) {
+            console.log(error.message);
+        });
+}
+</script>
+<script type="text/javascript">
+function deleteFunction(elementId) {
+	window.parent.Xrm.WebApi.deleteRecord("annotation", elementId).then(
+    function success(result) {
+        console.log("Account deleted");
+        top.window.location.reload();
+    },
+    function (error) {
+        console.log(error.message);
+    }
+);
+}
+</script>
+</html>
