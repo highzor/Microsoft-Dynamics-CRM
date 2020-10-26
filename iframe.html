@@ -52,14 +52,14 @@ function customSetRegion() {
                 };
             }
             for (property in anns) {
-			  tabBody=document.getElementsByTagName("table").item(0);
-			  row=document.createElement("tr");
+			  tabBody = document.getElementsByTagName("table").item(0);
+			  row = document.createElement("tr");
 			  cell1 = document.createElement("td");
 			  cell2 = document.createElement("td");
 			  cell3 = document.createElement("td");
-			  textnode1=document.createTextNode(anns[property].sub);
-			  textnode2=document.createTextNode(anns[property].note);
-			  textnode3=document.createElement("BUTTON");
+			  textnode1 = document.createTextNode(anns[property].sub);
+			  textnode2 = document.createTextNode(anns[property].note);
+			  textnode3 = document.createElement("BUTTON");
 			  textnode3.innerHTML = "удалить";
 			  textnode3.setAttribute("id", anns[property].id);
 			  textnode3.setAttribute("onclick", "deleteFunction(id);");
