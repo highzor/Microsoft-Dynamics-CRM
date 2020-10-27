@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<style type="text/css">
+TABLE {
+    border: 1px solid grey;
+	border-collapse: collapse;
+	text-align: center;
+	width: 500px;
+   }
+   TH {
+    border: 1px solid grey;
+	border-collapse: collapse;
+   }
+  </style>
+<table>
+  <tr>
+    <th>Название</th>
+    <th>Размер</th>
+    <th>Действие</th>
+  </tr>
+</table>
+<script type="text/javascript">
+customSetRegion()
+function customSetRegion() {
+    var serverUrl = window.parent.Xrm.Page.context.getClientUrl();
+    var annotationId = window.parent.Xrm.Page.data.entity.getId().replace(/\{|\}/g, '');
+    var oDataEndpointUrl = serverUrl + "/api/data/v9.0/annotations?$filter=_objectid_value eq " + annotationId + "&$select=filename,filesize,annotationid";
+    var service = GetRequestObject();
+    if (service != null) {
+        service.open("GET", oDataEndpointUrl, false);
+        service.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+        service.setRequestHeader("Accept", "application/json, text/javascript, */*");
+        service.send(null);
+        var retrieved = JSON.parse(service.responseText);
+        var results = new Array();
+        for (var i = 0; i < retrieved.value.length; i++) {
+            if (retrieved.value[i].filename != null) {
+                results[i] = {
+                    filename: retrieved.value[i].filename,
+                    filesize: retrieved.value[i].filesize,
+                    annotationid: retrieved.value[i].annotationid
+                };
+            }
+        }
+    }
+    for (property in results) {
+        tabBody = document.getElementsByTagName("table").item(0);
+        row = document.createElement("tr");
+        cell1 = document.createElement("td");
+        cell2 = document.createElement("td");
+        cell3 = document.createElement("td");
+        textnode1 = document.createTextNode(results[property].filename);
+        textnode2 = document.createTextNode(results[property].filesize);
+        textnode3 = document.createElement("BUTTON");
+        textnode3.innerHTML = "удалить";
+        textnode3.setAttribute("id", results[property].annotationid);
+        textnode3.setAttribute("onclick", "deleteFunction(id);");
+        cell1.appendChild(textnode1);
+        cell2.appendChild(textnode2);
+        cell3.appendChild(textnode3);
+        row.appendChild(cell1);
+        row.appendChild(cell2);
+        row.appendChild(cell3);
+        tabBody.appendChild(row);
+    }
+}
+function GetRequestObject() {
+    if (window.XMLHttpRequest) {
+        return new window.XMLHttpRequest;
+    } else {
+        try {
+            return new ActiveXObject("MSXML2.XMLHTTP.3.0");
+        } catch (ex) {
+            return null;
+        }
+    }
+}
+</script>
+<script type="text/javascript">
+function deleteFunction(elementId) {
+	window.parent.Xrm.WebApi.deleteRecord("annotation", elementId).then(
+    function success(result) {
+        console.log("Account deleted");
+        top.window.location.reload();
+    },
+    function (error) {
+        console.log(error.message);
+    }
+);
+}
+</script>
+</html>
