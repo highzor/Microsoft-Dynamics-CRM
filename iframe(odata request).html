@@ -63,7 +63,7 @@ Xrm.Page.getControl("WebResource_myHtml").setSrc(link);
         textnode3 = document.createElement("BUTTON");
         textnode3.innerHTML = "удалить";
         textnode3.setAttribute("id", results[property].annotationid);
-        textnode3.setAttribute("onclick", "deleteFunction(id);");
+        textnode3.setAttribute("onclick", "deleteFunctionByPlugin(id);");
         cell1.appendChild(textnode1);
         cell2.appendChild(textnode2);
         cell3.appendChild(textnode3);
@@ -96,6 +96,36 @@ function deleteFunction(elementId) {
         console.log(error.message);
     }
 );
+}
+function deleteFunctionByPlugin(elementId) {
+    var result = null;
+    var req = new XMLHttpRequest();
+
+    try {
+        req.open("POST", encodeURI("http://XX.XX.XX.XXX/LearnAPetukhov/api/data/v9.0/annotations("+ elementId +")/Microsoft.Dynamics.CRM.new_DeleteAnnotation?"), false);
+        req.setRequestHeader("Accept", "application/json");
+        req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        req.setRequestHeader("OData-MaxVersion", "4.0");
+        req.setRequestHeader("OData-Version", "4.0");
+        req.onreadystatechange = function () {
+            if (this.readyState == 4) {
+                req.onreadystatechange = null;
+                if (this.status == 200) {
+                    result = JSON.parse(this.response);
+                } else {
+                    var err = JSON.parse(this.response).error;
+                    alert(err.message);
+                }
+            }
+        };
+        var params = {
+            annotationId: elementId
+        };
+        req.send(JSON.stringify(params));
+		top.window.location.reload();
+    } catch (err) {
+        alert(err.message);
+    }
 }
 </script>
 </html>
