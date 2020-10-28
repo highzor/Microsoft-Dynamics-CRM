@@ -24,7 +24,7 @@ TABLE {
 customSetRegion()
 function customSetRegion() {
     var annotationId = location.search.substr(6);
-    var oDataEndpointUrl = "http://XX.XX.XX.XXX/LearnAPetukhov/api/data/v9.0/annotations?$filter=_objectid_value eq " + annotationId + "&$select=filename,filesize,annotationid";
+    var oDataEndpointUrl = "http://10.40.10.146/LearnAPetukhov/api/data/v9.0/annotations?$filter=_objectid_value eq " + annotationId + "&$select=filename,filesize,annotationid";
     var service = GetRequestObject();
     if (service != null) {
         service.open("GET", oDataEndpointUrl, false);
@@ -44,26 +44,37 @@ function customSetRegion() {
         }
     }
     for (property in results) {
-        tabBody = document.getElementsByTagName("table").item(0);
-        row = document.createElement("tr");
-        cell1 = document.createElement("td");
-        cell2 = document.createElement("td");
-        cell3 = document.createElement("td");
-        textnode1 = document.createTextNode(results[property].filename);
-        textnode2 = document.createTextNode(results[property].filesize);
-        textnode3 = document.createElement("BUTTON");
-        textnode3.innerHTML = "удалить";
-        textnode3.setAttribute("id", results[property].annotationid);
-        textnode3.setAttribute("onclick", "deleteFunctionByPlugin(id);");
-        cell1.appendChild(textnode1);
-        cell2.appendChild(textnode2);
-        cell3.appendChild(textnode3);
-        row.appendChild(cell1);
-        row.appendChild(cell2);
-        row.appendChild(cell3);
+        tabBody = getTable();
+        row = createRow();
         tabBody.appendChild(row);
     }
+	
+	function getTable() {
+	    return document.getElementsByTagName("table").item(0);
+	}
+
+	function createRow() {
+	    row = document.createElement("tr");
+	    cell1 = document.createElement("td");
+	    cell2 = document.createElement("td");
+	    cell3 = document.createElement("td");
+	    textnode1 = document.createTextNode(results[property].filename);
+	    textnode2 = document.createTextNode(results[property].filesize);
+	    textnode3 = document.createElement("BUTTON");
+	    textnode3.innerHTML = "удалить";
+	    textnode3.setAttribute("id", results[property].annotationid);
+	    textnode3.setAttribute("onclick", "deleteFunctionByPlugin(id);");
+	    cell1.appendChild(textnode1);
+	    cell2.appendChild(textnode2);
+	    cell3.appendChild(textnode3);
+	    row.appendChild(cell1);
+	    row.appendChild(cell2);
+	    row.appendChild(cell3);
+	    return row;
+	}
 }
+
+
 function GetRequestObject() {
     if (window.XMLHttpRequest) {
         return new window.XMLHttpRequest;
@@ -75,14 +86,13 @@ function GetRequestObject() {
         }
     }
 }
-</script>
-<script type="text/javascript">
+
 function deleteFunctionByPlugin(elementId) {
     var result = null;
     var req = new XMLHttpRequest();
 
     try {
-        req.open("POST", encodeURI("http://XX.XX.XX.XXX/LearnAPetukhov/api/data/v9.0/annotations("+ elementId +")/Microsoft.Dynamics.CRM.new_DeleteAnnotation?"), false);
+        req.open("POST", encodeURI("http://10.40.10.146/LearnAPetukhov/api/data/v9.0/annotations("+ elementId +")/Microsoft.Dynamics.CRM.new_DeleteAnnotation?"), false);
         req.setRequestHeader("Accept", "application/json");
         req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
         req.setRequestHeader("OData-MaxVersion", "4.0");
