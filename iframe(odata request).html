@@ -23,9 +23,17 @@ TABLE {
 <script type="text/javascript">
 customSetRegion()
 function customSetRegion() {
-    var serverUrl = window.parent.Xrm.Page.context.getClientUrl();
-    var annotationId = window.parent.Xrm.Page.data.entity.getId().replace(/\{|\}/g, '');
-    var oDataEndpointUrl = serverUrl + "/api/data/v9.0/annotations?$filter=_objectid_value eq " + annotationId + "&$select=filename,filesize,annotationid";
+/*
+Passing value to a web resource through the data parameter from customScriptsFrame (ClientApiWrapper.aspx):
+function setLinkWebRes() {
+var link = Xrm.Page.getControl("WebResource_myHtml").getSrc();
+var entityId = Xrm.Page.data.entity.getId().replace(/\{|\}/g, '');
+link += "?Data=" + entityId;
+Xrm.Page.getControl("WebResource_myHtml").setSrc(link);
+}
+*/
+    var annotationId = location.search.substr(6);
+    var oDataEndpointUrl = "http://XX.XX.XX.XXX/LearnAPetukhov/api/data/v9.0/annotations?$filter=_objectid_value eq " + annotationId + "&$select=filename,filesize,annotationid";
     var service = GetRequestObject();
     if (service != null) {
         service.open("GET", oDataEndpointUrl, false);
