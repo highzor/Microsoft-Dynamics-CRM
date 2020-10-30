@@ -1,6 +1,6 @@
 function checkAnnotationsForLead() {
     var entityId = Xrm.Page.data.entity.getId().replace(/\{|\}/g, '');
-    var oDataEndpointUrl = "http://10.40.10.146/LearnAPetukhov/api/data/v9.0/leads(" + entityId + ")/Lead_Annotation?$count=true";
+    var oDataEndpointUrl = "http://XX.XX.XX.XXX/LearnAPetukhov/api/data/v9.0/leads(" + entityId + ")/Lead_Annotation?$count=true";
     var service = GetRequestObject();
     if (service != null) {
         service.open("GET", oDataEndpointUrl, false);
