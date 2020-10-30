@@ -13,18 +13,13 @@ TABLE {
 	border-collapse: collapse;
    }
   </style>
-<table>
-  <tr>
-    <th>Название</th>
-    <th>Размер</th>
-    <th>Действие</th>
-  </tr>
-</table>
+  <body>
+  </body>
 <script type="text/javascript">
-customSetRegion()
+customSetRegion();
 function customSetRegion() {
     var annotationId = location.search.substr(6);
-    var oDataEndpointUrl = "http://XX.XX.XX.XXX/LearnAPetukhov/api/data/v9.0/annotations?$filter=_objectid_value eq " + annotationId + "&$select=filename,filesize,annotationid";
+    var oDataEndpointUrl = "http://10.40.10.146/LearnAPetukhov/api/data/v9.0/annotations?$filter=_objectid_value eq " + annotationId + "&$select=subject,filename,filesize,annotationid";
     var service = GetRequestObject();
     if (service != null) {
         service.open("GET", oDataEndpointUrl, false);
@@ -32,48 +27,72 @@ function customSetRegion() {
         service.setRequestHeader("Accept", "application/json, text/javascript, */*");
         service.send(null);
         var retrieved = JSON.parse(service.responseText);
-        var results = new Array();
-        for (var i = 0; i < retrieved.value.length; i++) {
-            if (retrieved.value[i].filename != null) {
-                results[i] = {
-                    filename: retrieved.value[i].filename,
-                    filesize: retrieved.value[i].filesize,
-                    annotationid: retrieved.value[i].annotationid
-                };
+        if (retrieved.value.length > 0) {
+            createTable();
+            var results = new Array();
+            for (var i = 0; i < retrieved.value.length; i++) {
+                if (retrieved.value[i].subject != null) {
+                    results[i] = {
+                        filename: retrieved.value[i].filename == null ? retrieved.value[i].subject : retrieved.value[i].filename,
+                        filesize: retrieved.value[i].filesize == null ? "текст" : retrieved.value[i].filesize,
+                        annotationid: retrieved.value[i].annotationid
+                    };
+                }
             }
         }
     }
+	
     for (property in results) {
-        tabBody = getTable();
         row = createRow();
-        tabBody.appendChild(row);
+        tableBody1.appendChild(row);
+    }
+
+    function createRow() {
+        row = document.createElement("tr");
+        cell1 = document.createElement("td");
+        cell2 = document.createElement("td");
+        cell3 = document.createElement("td");
+        textnode1 = document.createTextNode(results[property].filename);
+        textnode2 = document.createTextNode(results[property].filesize);
+        textnode3 = document.createElement("BUTTON");
+        textnode3.innerHTML = "удалить";
+        textnode3.setAttribute("id", results[property].annotationid);
+        textnode3.setAttribute("onclick", "deleteFunctionByPlugin(id);");
+        cell1.appendChild(textnode1);
+        cell2.appendChild(textnode2);
+        cell3.appendChild(textnode3);
+        row.appendChild(cell1);
+        row.appendChild(cell2);
+        row.appendChild(cell3);
+        return row;
+    }
+    function createTable() {
+        body = document.getElementsByTagName("body")[0];
+        table1 = document.createElement("table");
+        tableBody1 = document.createElement("tbody");
+        rowTbl = createTableHead();
+        tableBody1.appendChild(rowTbl);
+        table1.appendChild(tableBody1);
+        body.appendChild(table1);
     }
 	
-	function getTable() {
-	    return document.getElementsByTagName("table").item(0);
-	}
-
-	function createRow() {
-	    row = document.createElement("tr");
-	    cell1 = document.createElement("td");
-	    cell2 = document.createElement("td");
-	    cell3 = document.createElement("td");
-	    textnode1 = document.createTextNode(results[property].filename);
-	    textnode2 = document.createTextNode(results[property].filesize);
-	    textnode3 = document.createElement("BUTTON");
-	    textnode3.innerHTML = "удалить";
-	    textnode3.setAttribute("id", results[property].annotationid);
-	    textnode3.setAttribute("onclick", "deleteFunctionByPlugin(id);");
-	    cell1.appendChild(textnode1);
-	    cell2.appendChild(textnode2);
-	    cell3.appendChild(textnode3);
-	    row.appendChild(cell1);
-	    row.appendChild(cell2);
-	    row.appendChild(cell3);
-	    return row;
+	function createTableHead() {
+	    row1 = document.createElement("tr");
+        cell11 = document.createElement("th");
+        cell22 = document.createElement("th");
+        cell33 = document.createElement("th");
+        textnode11 = document.createTextNode("Название");
+        textnode22 = document.createTextNode("Размер");
+        textnode33 = document.createTextNode("Действие");
+        cell11.appendChild(textnode11);
+        cell22.appendChild(textnode22);
+        cell33.appendChild(textnode33);
+        row1.appendChild(cell11);
+        row1.appendChild(cell22);
+        row1.appendChild(cell33);
+		return row1;
 	}
 }
-
 
 function GetRequestObject() {
     if (window.XMLHttpRequest) {
@@ -90,9 +109,9 @@ function GetRequestObject() {
 function deleteFunctionByPlugin(elementId) {
     var result = null;
     var req = new XMLHttpRequest();
-
+	
     try {
-        req.open("POST", encodeURI("http://XX.XX.XX.XXX/LearnAPetukhov/api/data/v9.0/annotations("+ elementId +")/Microsoft.Dynamics.CRM.new_DeleteAnnotation?"), false);
+        req.open("POST", encodeURI("http://10.40.10.146/LearnAPetukhov/api/data/v9.0/annotations(" + elementId + ")/Microsoft.Dynamics.CRM.new_DeleteAnnotation?"), false);
         req.setRequestHeader("Accept", "application/json");
         req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
         req.setRequestHeader("OData-MaxVersion", "4.0");
@@ -112,7 +131,8 @@ function deleteFunctionByPlugin(elementId) {
             annotationId: elementId
         };
         req.send(JSON.stringify(params));
-		top.window.location.reload();
+        document.getElementsByTagName("table")[0].remove();
+        customSetRegion();
     } catch (err) {
         alert(err.message);
     }
