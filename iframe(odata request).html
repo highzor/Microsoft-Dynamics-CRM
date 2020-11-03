@@ -31,13 +31,11 @@ function customSetRegion() {
             createTable();
             var results = new Array();
             for (var i = 0; i < retrieved.value.length; i++) {
-                if (retrieved.value[i].subject != null) {
                     results[i] = {
-                        filename: retrieved.value[i].filename == null ? retrieved.value[i].subject : retrieved.value[i].filename,
+                        filename: retrieved.value[i].filename == null ? retrieved.value[i].subject == null ? "" : retrieved.value[i].subject : retrieved.value[i].filename,
                         filesize: retrieved.value[i].filesize == null ? "текст" : retrieved.value[i].filesize,
                         annotationid: retrieved.value[i].annotationid
                     };
-                }
             }
         }
     }
